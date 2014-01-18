@@ -1,0 +1,35 @@
+# http://stackoverflow.com/a/10427485/922323
+# http://www.askapache.com/htaccess/mod_rewrite-variables-cheatsheet.html
+
+AddDefaultCharset utf-8
+Options +FollowSymlinks -Indexes -MultiViews
+
+RewriteEngine on
+
+RewriteBase /
+
+# Block access to hidden files:
+RewriteCond %{SCRIPT_FILENAME} -d [OR]
+RewriteCond %{SCRIPT_FILENAME} -f
+RewriteRule "(^|/)\." - [F]
+
+# Force trailing slash:
+RewriteCond %{REQUEST_URI} /+[^\.]+$
+RewriteRule ^(.+[^/])$ %{REQUEST_URI}/ [R=301,L]
+
+# If a request tries to access the current year directly, then redirect
+# it to its canonical version:
+RewriteCond %{THE_REQUEST} 2014/
+RewriteRule ^2014/(.*)$ http://%{HTTP_HOST}/$1 [R=301,L]
+
+# .. and map any non-year requests to current year:
+RewriteCond %{REQUEST_URI} !201(2|3|4)/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /2014/?page=$1 [L,QSA]
+
+# Router:
+RewriteCond %{REQUEST_URI} ([0-9]{4})/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /%1/index.php?page=$1 [L,QSA]
